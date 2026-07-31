@@ -17,14 +17,14 @@ class FaultDetectionService {
     this.strategies.push(strategy);
   }
 
-  analyze(telemetryData, graph, neighbours) {
+  async analyze(telemetryData, graph, neighbours) {
     console.log('\n[FaultDetectionService] Starting analysis...');
     
     const results = [];
     
     // Execute all registered strategies
     for (const strategy of this.strategies) {
-      const result = strategy.detect(telemetryData, graph, neighbours);
+      const result = await strategy.detect(telemetryData, graph, neighbours);
       results.push(result);
     }
     

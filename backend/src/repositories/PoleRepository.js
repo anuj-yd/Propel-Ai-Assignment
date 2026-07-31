@@ -17,6 +17,14 @@ class PoleRepository {
     const pole = new Pole(poleData);
     return await pole.save();
   }
+
+  async getPolesByIds(poleIds) {
+    return await Pole.find({ poleId: { $in: poleIds } });
+  }
+
+  async updatePoleStatus(poleId, energized) {
+    return await Pole.findOneAndUpdate({ poleId }, { energized }, { new: true });
+  }
 }
 
 module.exports = new PoleRepository();

@@ -27,6 +27,9 @@ class TelemetryService {
     // Save telemetry to DB
     await telemetryRepository.saveTelemetry(data);
     
+    // Update current Pole Status in DB
+    await poleRepository.updatePoleStatus(data.pole_id, data.energized);
+    
     // 1. Get the current network graph from GraphBuilder
     const graph = graphBuilderService.getGraph();
     
@@ -39,7 +42,7 @@ class TelemetryService {
     console.log(`[TelemetryService] Pole ${data.pole_id} neighbours in graph:`, neighbours);
 
     // 3. Pass to FaultDetectionService (Strategy Pattern)
-    const faultResults = faultDetectionService.analyze(data, graph, neighbours);
+    const faultResults = await faultDetectionService.analyze(data, graph, neighbours);
 
     const detectionResult = {
       status: "Analyzed",
