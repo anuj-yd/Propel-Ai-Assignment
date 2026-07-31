@@ -1,9 +1,14 @@
 const graphBuilderService = require('./GraphBuilderService');
 const faultDetectionService = require('./FaultDetectionService');
+const poleRepository = require('../repositories/PoleRepository');
+const telemetryRepository = require('../repositories/TelemetryRepository');
 
 class TelemetryService {
   async process(data) {
     console.log(`\n[TelemetryService] Received telemetry for Pole: ${data.poleId}`);
+    
+    // Save telemetry to DB
+    await telemetryRepository.saveTelemetry(data);
     
     // 1. Get the current network graph from GraphBuilder
     const graph = graphBuilderService.getGraph();

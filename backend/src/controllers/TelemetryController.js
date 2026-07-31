@@ -15,8 +15,7 @@ class TelemetryController {
       const result = await telemetryService.process(telemetryData);
       
       return res.status(200).json({ 
-        message: 'Telemetry processed successfully', 
-        data: result 
+        message: 'Telemetry received' 
       });
       
     } catch (error) {

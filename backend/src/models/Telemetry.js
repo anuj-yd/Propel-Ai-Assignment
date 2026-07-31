@@ -15,6 +15,12 @@ const telemetrySchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  energized: {
+    type: Boolean,
+  },
+  timestamp: {
+    type: Date,
+  }
   // You can add more specific sensor data here
 }, { 
   timestamps: true 
