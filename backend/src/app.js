@@ -8,11 +8,15 @@ app.use(cors());
 app.use(express.json());
 
 const graphBuilderService = require('./services/GraphBuilderService');
+const telemetryRoutes = require('./routes/telemetryRoutes');
 
 // Basic route
 app.get('/', (req, res) => {
   res.send('API is running...');
 });
+
+// Telemetry API
+app.use('/telemetry', telemetryRoutes);
 
 // Test route to view the generated graph
 app.get('/graph', (req, res) => {
