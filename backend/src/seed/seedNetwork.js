@@ -27,6 +27,12 @@ const seedNetwork = async () => {
       { poleId: 'P4', transformerId: 'T1', lat: 28.7050, lng: 77.1040, energized: true },
       { poleId: 'P5', transformerId: 'T1', lat: 28.7055, lng: 77.1020, energized: true },
       { poleId: 'P6', transformerId: 'T1', lat: 28.7055, lng: 77.1040, energized: true },
+      
+      // Missing Topology Group (Transformer T2)
+      // These poles have NO explicit connections in the database
+      { poleId: 'P7', transformerId: 'T2', lat: 28.7100, lng: 77.1100, energized: true },
+      { poleId: 'P8', transformerId: 'T2', lat: 28.7110, lng: 77.1105, energized: true },
+      { poleId: 'P9', transformerId: 'T2', lat: 28.7120, lng: 77.1110, energized: true },
     ];
 
     // Define Connections based on the diagram
