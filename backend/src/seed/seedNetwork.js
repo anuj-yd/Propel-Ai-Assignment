@@ -18,8 +18,6 @@ const seedNetwork = async () => {
 
     console.log('Mongo is empty. Seeding the static network data...');
 
-    // Define Poles based on the diagram
-    // I am assigning placeholder coordinates since they were in the Pole schema
     const polesToInsert = [
       { poleId: 'P1', transformerId: 'T1', lat: 28.7041, lng: 77.1025, energized: true },
       { poleId: 'P2', transformerId: 'T1', lat: 28.7045, lng: 77.1030, energized: true },
@@ -28,16 +26,13 @@ const seedNetwork = async () => {
       { poleId: 'P5', transformerId: 'T1', lat: 28.7055, lng: 77.1020, energized: true },
       { poleId: 'P6', transformerId: 'T1', lat: 28.7055, lng: 77.1040, energized: true },
       
-      // Missing Topology Group (Transformer T2)
-      // These poles have NO explicit connections in the database
       { poleId: 'P7', transformerId: 'T2', lat: 28.7100, lng: 77.1100, energized: true },
       { poleId: 'P8', transformerId: 'T2', lat: 28.7110, lng: 77.1105, energized: true },
       { poleId: 'P9', transformerId: 'T2', lat: 28.7120, lng: 77.1110, energized: true },
     ];
 
-    // Define Connections based on the diagram
     const connectionsToInsert = [
-      { from: 'T1', to: 'P1' }, // Connection from Transformer to first Pole
+      { from: 'T1', to: 'P1' },
       { from: 'P1', to: 'P2' },
       { from: 'P2', to: 'P3' },
       { from: 'P2', to: 'P4' },
@@ -45,11 +40,10 @@ const seedNetwork = async () => {
       { from: 'P4', to: 'P6' }
     ];
 
-    // Insert data
     await Pole.insertMany(polesToInsert);
     await Connection.insertMany(connectionsToInsert);
 
-    console.log('Seed completed successfully. Inserted 6 Poles and 6 Connections.');
+    console.log(`Seed completed successfully. Inserted ${polesToInsert.length} Poles and ${connectionsToInsert.length} Connections.`);
   } catch (error) {
     console.error('Error seeding data:', error);
     throw error;

@@ -21,6 +21,10 @@ class TicketRepository {
       { returnDocument: 'after' }
     );
   }
+
+  async getAllTickets() {
+    return await Ticket.find({}).sort({ createdAt: -1 });
+  }
 }
 
 module.exports = new TicketRepository();

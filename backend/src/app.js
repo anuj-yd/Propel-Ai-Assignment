@@ -9,6 +9,7 @@ app.use(express.json());
 
 const graphBuilderService = require('./services/GraphBuilderService');
 const telemetryRoutes = require('./routes/telemetryRoutes');
+const ticketRoutes = require('./routes/ticketRoutes');
 
 // Basic route
 app.get('/', (req, res) => {
@@ -17,6 +18,7 @@ app.get('/', (req, res) => {
 
 // Telemetry API
 app.use('/telemetry', telemetryRoutes);
+app.use('/tickets', ticketRoutes);
 
 // Test route to view the generated graph
 app.get('/graph', (req, res) => {
