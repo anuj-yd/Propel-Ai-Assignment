@@ -1,6 +1,7 @@
 const SpanDetector = require('./strategies/SpanDetector');
 const DTDetector = require('./strategies/DTDetector');
 const FeederDetector = require('./strategies/FeederDetector');
+const ticketService = require('./TicketService');
 
 class FaultDetectionService {
   constructor() {
@@ -33,7 +34,11 @@ class FaultDetectionService {
     
     if (detectedFaults.length > 0) {
       console.log(`[FaultDetectionService] ALERT! ${detectedFaults.length} fault(s) detected:`, detectedFaults);
-      // Next Step: Call TicketService to generate a ticket here
+      
+      // Call TicketService to generate tickets for each detected fault
+      for (const fault of detectedFaults) {
+        await ticketService.generateTicket(fault);
+      }
     } else {
       console.log('[FaultDetectionService] No faults detected. Network is healthy.');
     }

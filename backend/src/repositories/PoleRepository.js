@@ -10,7 +10,7 @@ class PoleRepository {
   }
 
   async updatePole(poleId, updateData) {
-    return await Pole.findOneAndUpdate({ poleId }, updateData, { new: true });
+    return await Pole.findOneAndUpdate({ poleId }, updateData, { returnDocument: 'after' });
   }
 
   async savePole(poleData) {
@@ -23,7 +23,7 @@ class PoleRepository {
   }
 
   async updatePoleStatus(poleId, energized) {
-    return await Pole.findOneAndUpdate({ poleId }, { energized }, { new: true });
+    return await Pole.findOneAndUpdate({ poleId }, { energized }, { returnDocument: 'after' });
   }
 }
 
