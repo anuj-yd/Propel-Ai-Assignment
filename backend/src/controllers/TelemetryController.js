@@ -7,8 +7,8 @@ class TelemetryController {
       const telemetryData = req.body;
       
       // Basic Validation
-      if (!telemetryData || !telemetryData.poleId) {
-        return res.status(400).json({ error: 'poleId is required in telemetry data' });
+      if (!telemetryData || !telemetryData.pole_id || !telemetryData.device_id) {
+        return res.status(400).json({ error: 'pole_id and device_id are required in telemetry data' });
       }
 
       // Delegate business logic to Service
