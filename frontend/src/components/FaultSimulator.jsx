@@ -29,7 +29,7 @@ export default function FaultSimulator() {
       event: formData.event,
       energized: formData.energized === 'true',
       ts: new Date().toISOString(),
-      seq: Math.floor(Math.random() * 10000)
+      seq: Date.now()
     };
 
     try {

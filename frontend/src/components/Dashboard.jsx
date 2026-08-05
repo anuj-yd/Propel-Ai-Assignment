@@ -1,12 +1,16 @@
 import React from 'react';
 import TicketFeed from './TicketFeed';
 import FaultSimulator from './FaultSimulator';
+import NetworkMap from './NetworkMap';
 
 export default function Dashboard() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-8 flex-1 overflow-auto lg:overflow-hidden">
-      {/* Left Column: Active Incidents Feed */}
-      <div className="flex flex-col gap-4 lg:overflow-y-auto pr-4">
+      {/* Left Column: Active Incidents Feed & Map */}
+      <div className="flex flex-col gap-8 lg:overflow-y-auto pr-4">
+        
+        <NetworkMap />
+
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">Active Incidents</h2>
           <div className="flex items-center gap-2 text-sm text-emerald-400">

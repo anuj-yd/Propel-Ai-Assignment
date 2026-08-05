@@ -25,4 +25,9 @@ export const simulateTelemetry = async (payload) => {
   return response.data;
 };
 
+export const fetchNetwork = async () => {
+  const response = await api.get('/network');
+  return response.data;
+};
+
 export default api;
