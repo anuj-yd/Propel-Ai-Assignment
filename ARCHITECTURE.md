@@ -16,7 +16,7 @@ graph TD
     G -- Fault Detected --> I[Ticket Service]
     
     I --> J[Offline Geocoder (OSM)]
-    I --> K[Gemini AI Service]
+    I --> K[OpenAI AI Service]
     
     J --> L[(MongoDB)]
     K --> L
@@ -79,6 +79,6 @@ The Operator Dashboard is split into two clear areas:
 
 ## 8. The AI Feature
 
-* **What it is:** The AI (`Gemini 1.5 Flash`) acts as a Dispatch Assistant. It reads the fault boundary and pincode, and generates a short briefing for the field crew (suggesting ladders, voltage gear, etc.).
+* **What it is:** The AI (`OpenAI GPT-3.5`) acts as a Dispatch Assistant. It reads the fault boundary and pincode, and generates a short briefing for the field crew (suggesting ladders, voltage gear, etc.).
 * **Why here?** It bridges the gap between raw data ("Span Fault P1-P2") and human action ("Take a 40ft ladder to Sector 12").
 * **Cost / Failure Mode:** It costs fractions of a cent per call. If the LLM times out or is unavailable, the `AiService` gracefully degrades to a static string, ensuring the ticket is still created without delay.

@@ -31,7 +31,7 @@ A `.env` file is provided in the root of the `backend` folder. If you deploy to 
 |----------|---------|----------|--------------|
 | `PORT` | The port the backend runs on | No | `5000` |
 | `MONGO_URI` | Connection string for MongoDB | No | `mongodb://localhost:27017/propel_ai` |
-| `GEMINI_API_KEY` | API key for generating AI briefings | **Yes** | N/A |
+| `OPENAI_API_KEY` | API key for generating AI briefings | **Yes** | N/A |
 | `NODE_ENV` | Environment mode | No | `development` |
 
 ## 4. Troubleshooting Guide

@@ -1,10 +1,10 @@
 # AI Workflow & Collaboration
 
-This document outlines how I used AI (Gemini) to build this project, where it saved me hours of work, and where I had to step in because the AI completely missed the physical realities of the problem.
+This document outlines how I used AI (OpenAI) to build this project, where it saved me hours of work, and where I had to step in because the AI completely missed the physical realities of the problem.
 
 ## 1. Tools Used
 - **Agentic IDE Assistant:** Used as my primary pair programmer to generate React boilerplate, configure Tailwind CSS, and write the heavy graph-traversal logic in Node.js.
-- **Gemini 1.5 Flash (Runtime API):** Integrated into the backend (`AiService.js`) to generate natural language briefings for the repair crews.
+- **OpenAI GPT-3.5 (Runtime API):** Integrated into the backend (`AiService.js`) to generate natural language briefings for the repair crews.
 
 ## 2. Delegation vs. Manual Control
 
