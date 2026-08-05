@@ -2,8 +2,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 class AiService {
   constructor() {
-    // We use the provided key as a fallback if the env variable isn't set yet on Render
-    this.apiKey = process.env.GEMINI_API_KEY || 'AIzaSyBzQkEiLnfkfYIzRZ094oeL8rrUHc0kG40';
+    this.apiKey = process.env.GEMINI_API_KEY;
     if (this.apiKey) {
       this.genAI = new GoogleGenerativeAI(this.apiKey);
     }
