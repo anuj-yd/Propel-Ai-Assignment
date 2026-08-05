@@ -4,7 +4,12 @@ const NodeGeocoder = require('node-geocoder');
 const { v4: uuidv4 } = require('uuid');
 
 const geocoder = NodeGeocoder({
-  provider: 'openstreetmap'
+  provider: 'openstreetmap',
+  httpAdapter: 'https',
+  formatter: null,
+  headers: {
+    'User-Agent': 'PropelAI-SmartGrid/1.0 (ay325@example.com)'
+  }
 });
 
 class TicketService {
@@ -37,8 +42,8 @@ class TicketService {
           const lon = poles[0].lng || poles[0].lon;
           if (lat && lon) {
              const geoResult = await geocoder.reverse({ lat, lon });
-             if (geoResult && geoResult.length > 0 && geoResult[0].zipcode) {
-                pincode = geoResult[0].zipcode;
+             if (geoResult && geoResult.length > 0) {
+                pincode = geoResult[0].zipcode || geoResult[0].postcode || 'UNKNOWN';
              }
           }
         } catch (error) {
