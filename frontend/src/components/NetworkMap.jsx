@@ -47,52 +47,125 @@ export default function NetworkMap() {
     };
   }, []);
 
-  // Calculate SVG bounds
-  const bounds = useMemo(() => {
-    if (poles.length === 0) return null;
-    const lats = poles.map(p => p.lat);
-    const lngs = poles.map(p => p.lng);
-    return {
-      minLat: Math.min(...lats),
-      maxLat: Math.max(...lats),
-      minLng: Math.min(...lngs),
-      maxLng: Math.max(...lngs)
-    };
-  }, [poles]);
-
-  if (loading) return <div className="text-slate-400">Loading Network Map...</div>;
-  if (!bounds) return null;
-
-  // Normalization helpers for SVG (0 to 1000 range)
-  const padding = 120;
+  const padding = 80;
   const width = 1000;
   const height = 500;
   
-  const getX = (lng) => {
-    const range = bounds.maxLng - bounds.minLng || 1;
-    return padding + ((lng - bounds.minLng) / range) * (width - 2 * padding);
-  };
-  
-  const getY = (lat) => {
-    const range = bounds.maxLat - bounds.minLat || 1;
-    // Invert Y so higher latitude is at the top
-    return height - padding - ((lat - bounds.minLat) / range) * (height - 2 * padding);
-  };
+  // Calculate logical tree layout
+  const layout = useMemo(() => {
+    if (poles.length === 0) return {};
+    
+    // Group poles by transformerId
+    const tGroups = {};
+    poles.forEach(p => {
+      if (!tGroups[p.transformerId]) tGroups[p.transformerId] = [];
+      tGroups[p.transformerId].push(p);
+    });
 
-  // Build edges taking both explicit and implicit MST connections into account
-  // For visual simplicity, we will just draw explicit connections from DB
+    const positions = {};
+    const tKeys = Object.keys(tGroups).sort();
+    
+    // Divide width evenly among transformers
+    const widthPerT = (width - 2 * padding) / (tKeys.length || 1);
+
+    tKeys.forEach((tId, tIndex) => {
+      const groupPoles = tGroups[tId];
+      
+      // Build adjacency for this group
+      const adj = {};
+      const inDegree = {};
+      groupPoles.forEach(p => {
+        adj[p.poleId] = [];
+        inDegree[p.poleId] = 0;
+      });
+
+      connections.forEach(c => {
+        if (adj[c.from] && inDegree[c.to] !== undefined) {
+          adj[c.from].push(c.to);
+          inDegree[c.to]++;
+        }
+      });
+
+      // Find roots (in-degree 0)
+      let roots = groupPoles.filter(p => inDegree[p.poleId] === 0).map(p => p.poleId);
+      
+      const levels = {};
+      const queue = roots.map(id => ({ id, level: 0 }));
+      const visited = new Set(roots);
+      
+      // BFS to assign depths
+      while(queue.length > 0) {
+        const {id, level} = queue.shift();
+        levels[id] = level;
+        
+        if (adj[id]) {
+          adj[id].forEach(child => {
+            if (!visited.has(child)) {
+              visited.add(child);
+              queue.push({id: child, level: level + 1});
+            }
+          });
+        }
+      }
+
+      // Handle disconnected poles
+      groupPoles.forEach(p => {
+        if (levels[p.poleId] === undefined) levels[p.poleId] = 0;
+      });
+
+      // Distribute items horizontally within each level
+      const levelCounts = {};
+      groupPoles.forEach(p => {
+        const l = levels[p.poleId];
+        levelCounts[l] = (levelCounts[l] || 0) + 1;
+      });
+
+      const maxLevel = Math.max(...Object.values(levels));
+      const levelCurrent = {};
+      
+      const tStartX = padding + tIndex * widthPerT;
+      
+      groupPoles.forEach(p => {
+        const l = levels[p.poleId];
+        levelCurrent[l] = (levelCurrent[l] || 0) + 1;
+        
+        const count = levelCounts[l];
+        const stepX = widthPerT / (count + 1);
+        const x = tStartX + levelCurrent[l] * stepX;
+        
+        const stepY = maxLevel > 0 ? (height - 2 * padding) / maxLevel : 0;
+        const y = padding + l * stepY;
+        
+        positions[p.poleId] = { x, y };
+      });
+    });
+
+    return positions;
+  }, [poles, connections]);
+
+  const getX = (poleId) => layout[poleId]?.x || 0;
+  const getY = (poleId) => layout[poleId]?.y || 0;
+
+  // Render curved connections (Bezier curves) for a premium look
   const renderEdges = () => {
     return connections.map((conn, i) => {
-      const p1 = poles.find(p => p.poleId === conn.from || p.transformerId === conn.from);
+      const p1 = poles.find(p => p.poleId === conn.from);
       const p2 = poles.find(p => p.poleId === conn.to);
-      if (!p1 || !p2) return null;
+      if (!p1 || !p2) return null; // Ignore connections from Transformers (like T1 -> P1) for clean UI
+      
+      const x1 = getX(p1.poleId);
+      const y1 = getY(p1.poleId);
+      const x2 = getX(p2.poleId);
+      const y2 = getY(p2.poleId);
+      
       return (
-        <line 
+        <path 
           key={i} 
-          x1={getX(p1.lng)} y1={getY(p1.lat)} 
-          x2={getX(p2.lng)} y2={getY(p2.lat)} 
-          stroke="rgba(255,255,255,0.2)" 
+          d={`M ${x1} ${y1} C ${x1} ${(y1+y2)/2}, ${x2} ${(y1+y2)/2}, ${x2} ${y2}`}
+          stroke="rgba(255,255,255,0.15)" 
+          fill="none"
           strokeWidth="3" 
+          className="transition-all duration-500"
         />
       );
     });
@@ -100,42 +173,43 @@ export default function NetworkMap() {
 
   return (
     <div className="glass-panel p-6 flex-1 w-full flex flex-col">
-      <h3 className="text-xl font-semibold mb-4 text-slate-200">Network Topology</h3>
+      <h3 className="text-xl font-semibold mb-4 text-slate-200">Network Topology (Hierarchical View)</h3>
       <div className="flex-1 w-full bg-slate-900/50 rounded-xl overflow-hidden relative" style={{ minHeight: '350px' }}>
         
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full object-contain">
           {renderEdges()}
           
           {poles.map(pole => (
-            <g key={pole.poleId} className="transition-all duration-300">
+            <g key={pole.poleId} className="transition-all duration-500">
               <circle 
-                cx={getX(pole.lng)} 
-                cy={getY(pole.lat)} 
-                r="12" 
+                cx={getX(pole.poleId)} 
+                cy={getY(pole.poleId)} 
+                r="14" 
                 fill={
                   pole.energized 
-                    ? '#10b981' // Green (Live)
+                    ? '#10b981' 
                     : ((tickets || []).some(t => t.boundary && t.boundary.includes(pole.poleId)) 
-                        ? '#ef4444' // Red (Span Fault)
-                        : '#f59e0b') // Orange (Dead Sensor / Noise)
+                        ? '#ef4444' 
+                        : '#f59e0b')
                 } 
-                className="transition-colors duration-500 hover:r-16"
+                className="transition-colors duration-500 hover:scale-110 cursor-pointer origin-center"
                 style={{ 
-                  filter: `drop-shadow(0 0 8px ${
+                  transformOrigin: `${getX(pole.poleId)}px ${getY(pole.poleId)}px`,
+                  filter: `drop-shadow(0 0 12px ${
                     pole.energized 
                       ? 'rgba(16,185,129,0.5)' 
                       : ((tickets || []).some(t => t.boundary && t.boundary.includes(pole.poleId)) ? 'rgba(239,68,68,0.5)' : 'rgba(245,158,11,0.5)')
-                  })`,
-                  cursor: 'pointer'
+                  })`
                 }}
               />
               <text 
-                x={getX(pole.lng) + 20} 
-                y={getY(pole.lat) + 5} 
+                x={getX(pole.poleId) + 24} 
+                y={getY(pole.poleId) + 5} 
                 textAnchor="start" 
-                fill="#cbd5e1" 
-                fontSize="14" 
+                fill="#e2e8f0" 
+                fontSize="15" 
                 fontWeight="bold"
+                className="tracking-wider"
               >
                 {pole.poleId}
               </text>
