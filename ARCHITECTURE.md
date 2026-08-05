@@ -31,5 +31,7 @@ The operator dashboard is designed for high-stress environments.
 - **Immediate Focus**: Active tickets and a map view are front and center.
 - **Omissions**: Raw telemetry logs are hidden to avoid cognitive overload. We expect operators might initially distrust the inferred topology, so tickets clearly state if they are based on inferred connections.
 
-## AI Feature
-- The AI feature assists in reverse-geocoding and prioritizing tickets based on historical patterns. If unavailable, the system gracefully degrades to basic lat/lng reporting without blocking the pipeline.
+## AI Feature (Ticket Prioritization & Crew Briefing)
+- **What it is**: An integration with OpenAI LLM (gpt-3.5-turbo) that automatically reads the fault type and boundary poles to generate a concise, human-readable priority summary and equipment briefing for the repair crew.
+- **Why this spot**: We deliberately avoided using AI for *Fault Localization*, as a graph traversal is deterministic, instant, free, and explainable (whereas an LLM is not). Instead, AI is used here to reduce the cognitive load on the operator by translating technical boundary IDs into a plain-English action plan.
+- **Graceful Degradation**: If the `GEMINI_API_KEY` is missing, the model is unavailable, or a network timeout occurs, the system gracefully degrades to a standard automated priority string without blocking ticket generation.

@@ -47,13 +47,17 @@ class TicketService {
       }
     }
 
+    const aiService = require('./AiService');
+    const briefing = await aiService.generateCrewBriefing(faultResult.type, faultResult.boundary, pincode);
+
     const ticketData = {
       ticketId: uuidv4(),
       faultType: faultResult.type,
       boundary: faultResult.boundary,
       pincode: pincode,
       status: 'OPEN',
-      details: faultResult.details
+      details: faultResult.details,
+      aiBriefing: briefing
     };
 
     const newTicket = await ticketRepository.createTicket(ticketData);

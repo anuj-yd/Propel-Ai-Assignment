@@ -25,6 +25,9 @@ const ticketSchema = new mongoose.Schema({
   details: {
     type: String,
   },
+  aiBriefing: {
+    type: String,
+  },
   resolvedAt: {
     type: Date,
   }

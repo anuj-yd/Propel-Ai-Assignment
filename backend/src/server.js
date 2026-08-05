@@ -27,6 +27,9 @@ io.on('connection', (socket) => {
   });
 });
 
+const ticketService = require('./services/TicketService');
+ticketService.setSocketIo(io);
+
 // Start Sequence: Connect -> Seed -> Build Graph -> Start Server
 mongoose.connect(MONGO_URI)
   .then(async () => {
