@@ -3,6 +3,8 @@
 ![Smart Grid](https://img.shields.io/badge/Domain-Smart%20Grid-success)
 ![Node.js](https://img.shields.io/badge/Backend-Node.js%20%7C%20Express-green)
 ![React](https://img.shields.io/badge/Frontend-React%20%7C%20Vite-blue)
+![ReactRouter](https://img.shields.io/badge/Router-React%20Router%20DOM-CA4245)
+![Axios](https://img.shields.io/badge/HTTP-Axios-5A29E4)
 
 Welcome to the **Smart Grid Fault Localization System**. This system is built to ingest massive streams of IoT telemetry data from distribution poles, instantly localize power faults using Graph Theory, and automatically generate support tickets with offline reverse geocoding.
 

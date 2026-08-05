@@ -1,4 +1,5 @@
 import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 
 class ErrorBoundary extends React.Component {
@@ -41,7 +42,9 @@ function App() {
           </div>
         </header>
         
-        <Dashboard />
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+        </Routes>
       </div>
     </ErrorBoundary>
   );
