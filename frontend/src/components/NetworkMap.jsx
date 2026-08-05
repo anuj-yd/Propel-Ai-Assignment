@@ -64,9 +64,9 @@ export default function NetworkMap() {
   if (!bounds) return null;
 
   // Normalization helpers for SVG (0 to 1000 range)
-  const padding = 100;
-  const width = 800;
-  const height = 400;
+  const padding = 120;
+  const width = 1000;
+  const height = 500;
   
   const getX = (lng) => {
     const range = bounds.maxLng - bounds.minLng || 1;
@@ -101,7 +101,7 @@ export default function NetworkMap() {
   return (
     <div className="glass-panel p-6 flex-1 w-full flex flex-col">
       <h3 className="text-xl font-semibold mb-4 text-slate-200">Network Topology</h3>
-      <div className="flex-1 w-full bg-slate-900/50 rounded-xl overflow-hidden relative" style={{ minHeight: '300px' }}>
+      <div className="flex-1 w-full bg-slate-900/50 rounded-xl overflow-hidden relative" style={{ minHeight: '350px' }}>
         
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full object-contain">
           {renderEdges()}
@@ -119,19 +119,20 @@ export default function NetworkMap() {
                         ? '#ef4444' // Red (Span Fault)
                         : '#f59e0b') // Orange (Dead Sensor / Noise)
                 } 
-                className="transition-colors duration-500"
+                className="transition-colors duration-500 hover:r-16"
                 style={{ 
                   filter: `drop-shadow(0 0 8px ${
                     pole.energized 
                       ? 'rgba(16,185,129,0.5)' 
                       : ((tickets || []).some(t => t.boundary && t.boundary.includes(pole.poleId)) ? 'rgba(239,68,68,0.5)' : 'rgba(245,158,11,0.5)')
-                  })` 
+                  })`,
+                  cursor: 'pointer'
                 }}
               />
               <text 
-                x={getX(pole.lng)} 
-                y={getY(pole.lat) - 20} 
-                textAnchor="middle" 
+                x={getX(pole.lng) + 20} 
+                y={getY(pole.lat) + 5} 
+                textAnchor="start" 
                 fill="#cbd5e1" 
                 fontSize="14" 
                 fontWeight="bold"
