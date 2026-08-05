@@ -2,6 +2,7 @@ const graphBuilderService = require('./GraphBuilderService');
 const faultDetectionService = require('./FaultDetectionService');
 const poleRepository = require('../repositories/PoleRepository');
 const telemetryRepository = require('../repositories/TelemetryRepository');
+const ticketService = require('./TicketService');
 
 class TelemetryService {
   async process(data) {
@@ -29,6 +30,20 @@ class TelemetryService {
     
     // Update current Pole Status in DB
     await poleRepository.updatePoleStatus(data.pole_id, data.energized);
+    
+    // Handle Scheduled Outages: Update DB but do not trigger fault detection
+    if (data.event === 'scheduled_outage') {
+      console.log(`[TelemetryService] Scheduled outage for Pole ${data.pole_id}, skipping fault detection.`);
+      return { status: 'Ignored', reason: 'Scheduled outage' };
+    }
+    
+    // Hook for Auto-Resolution
+    if (data.energized === true) {
+      // Background auto-resolve check
+      ticketService.autoResolveByPole(data.pole_id).catch(err => {
+        console.error('[TelemetryService] Error in auto-resolve:', err);
+      });
+    }
     
     // 1. Get the current network graph from GraphBuilder
     const graph = graphBuilderService.getGraph();

@@ -70,6 +70,31 @@ class TicketService {
 
     return newTicket;
   }
+
+  async autoResolveByPole(poleId) {
+    console.log(`[TicketService] Attempting to auto-resolve tickets involving pole ${poleId}...`);
+    
+    // Find all open tickets
+    const openTickets = await ticketRepository.getOpenTickets();
+    
+    // Filter tickets where this pole is in the boundary
+    const relevantTickets = openTickets.filter(t => t.boundary && t.boundary.includes(poleId));
+    
+    for (const ticket of relevantTickets) {
+      // Check if all poles in the boundary are now energized
+      const poles = await poleRepository.getPolesByIds(ticket.boundary);
+      const darkPoles = poles.filter(p => p.energized === false);
+      
+      if (darkPoles.length === 0) {
+        console.log(`[TicketService] Auto-resolving ticket ${ticket.ticketId} as all boundary poles are now energized.`);
+        const resolvedTicket = await ticketRepository.resolveTicket(ticket.ticketId);
+        
+        if (this.io) {
+          this.io.emit('TICKET_RESOLVED', resolvedTicket);
+        }
+      }
+    }
+  }
 }
 
 module.exports = new TicketService();
