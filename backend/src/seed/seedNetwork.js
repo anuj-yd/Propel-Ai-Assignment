@@ -19,16 +19,18 @@ const seedNetwork = async () => {
     console.log('Mongo is empty. Seeding the static network data...');
 
     const polesToInsert = [
-      { poleId: 'P1', transformerId: 'T1', lat: 28.7041, lng: 77.1025, energized: true },
-      { poleId: 'P2', transformerId: 'T1', lat: 28.7045, lng: 77.1030, energized: true },
-      { poleId: 'P3', transformerId: 'T1', lat: 28.7050, lng: 77.1020, energized: true },
-      { poleId: 'P4', transformerId: 'T1', lat: 28.7050, lng: 77.1040, energized: true },
-      { poleId: 'P5', transformerId: 'T1', lat: 28.7055, lng: 77.1020, energized: true },
-      { poleId: 'P6', transformerId: 'T1', lat: 28.7055, lng: 77.1040, energized: true },
+      // Feeder 1 (Tree structure)
+      { poleId: 'P1', transformerId: 'T1', lat: 28.7000, lng: 77.1000, energized: true },
+      { poleId: 'P2', transformerId: 'T1', lat: 28.7010, lng: 77.1000, energized: true },
+      { poleId: 'P3', transformerId: 'T1', lat: 28.7020, lng: 77.0980, energized: true },
+      { poleId: 'P4', transformerId: 'T1', lat: 28.7020, lng: 77.1020, energized: true },
+      { poleId: 'P5', transformerId: 'T1', lat: 28.7030, lng: 77.0980, energized: true },
+      { poleId: 'P6', transformerId: 'T1', lat: 28.7030, lng: 77.1020, energized: true },
       
-      { poleId: 'P7', transformerId: 'T2', lat: 28.7100, lng: 77.1100, energized: true },
-      { poleId: 'P8', transformerId: 'T2', lat: 28.7110, lng: 77.1105, energized: true },
-      { poleId: 'P9', transformerId: 'T2', lat: 28.7120, lng: 77.1110, energized: true },
+      // Feeder 2 (Line structure)
+      { poleId: 'P7', transformerId: 'T2', lat: 28.7000, lng: 77.1050, energized: true },
+      { poleId: 'P8', transformerId: 'T2', lat: 28.7010, lng: 77.1050, energized: true },
+      { poleId: 'P9', transformerId: 'T2', lat: 28.7020, lng: 77.1050, energized: true },
     ];
 
     const connectionsToInsert = [

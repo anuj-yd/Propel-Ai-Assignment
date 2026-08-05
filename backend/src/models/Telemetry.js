@@ -5,7 +5,7 @@ const telemetrySchema = new mongoose.Schema({
   pole_id: { type: String, required: true },
   event: { 
     type: String, 
-    enum: ['heartbeat', 'power_lost', 'power_restored', 'boot'], 
+    enum: ['heartbeat', 'power_lost', 'power_restored', 'boot', 'scheduled_outage', 'status_update'], 
     required: true 
   },
   energized: { type: Boolean, required: true },

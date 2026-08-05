@@ -28,7 +28,9 @@ io.on('connection', (socket) => {
 });
 
 const ticketService = require('./services/TicketService');
+const telemetryService = require('./services/TelemetryService');
 ticketService.setSocketIo(io);
+telemetryService.setSocketIo(io);
 
 // Start Sequence: Connect -> Seed -> Build Graph -> Start Server
 mongoose.connect(MONGO_URI)

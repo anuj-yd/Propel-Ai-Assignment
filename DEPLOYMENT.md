@@ -1,37 +1,64 @@
-# Deployment
+# Deployment Guide
 
-This guide explains how to deploy the Propel AI Smart Grid Fault Localization System.
+This guide explains how to run the Propel AI Smart Grid system from a fresh clone.
 
-## Prerequisites
-- **Docker** and **Docker Compose** installed.
-- Git.
+## 1. Prerequisites
+- Docker & Docker Compose
+- Node.js (v18+) (if running locally without Docker)
+- Git
 
-## Quick Start (Single Command)
-To bring up the entire stack (Database, Backend, Frontend), run:
+## 2. Zero-Config Startup (Docker Compose)
+
+The easiest way to run the entire stack is via Docker.
+
 ```bash
+# 1. Clone the repository
 git clone <your-repo-url>
-cd Propel-Ai-Assignment
+cd <your-repo-name>
+
+# 2. Build and start the containers
 docker compose up --build
 ```
+This single command spins up MongoDB, the Express Backend, and the Vite React Frontend. 
+- Open `http://localhost:5173` to see the UI.
+- The database is automatically seeded on startup.
 
-## Environment Variables
-The system uses reasonable defaults so it can run out of the box, but you can configure the following in the `docker-compose.yml` or a `.env` file:
-- `MONGO_URI`: Connection string for MongoDB. (Default: `mongodb://mongodb:27017/propel_ai`)
-- `PORT`: Backend API port. (Default: `5000`)
+## 3. Environment Variables
 
-## Verifying Deployment
-1. **Frontend**: Open `http://localhost:80` in your browser. You should see the operator dashboard.
-2. **Backend**: Open `http://localhost:5000/`. You should see "API is running...".
-3. **Graph Data**: Open `http://localhost:5000/graph` to verify that the topology was seeded successfully.
+A `.env` file is provided in the root of the `backend` folder. If you deploy to a VPS or Render, configure these:
 
-## Troubleshooting
-- **Port Conflicts**: If port 80 or 5000 is already in use on your host machine, edit `docker-compose.yml` to map to different host ports (e.g., `"8080:80"` or `"5001:5000"`).
-- **Empty Database/No Graph**: If the app starts but the map is empty, ensure the backend logs show "Inserted 9 Poles...". If not, you can restart the backend container or clear the mongo volume (`docker compose down -v` and then `up` again).
-- **Vite/Frontend not updating**: Since it's a production build inside Docker, any code changes require running `docker compose up --build` to rebuild the frontend image.
+| Variable | Purpose | Required | Safe Default |
+|----------|---------|----------|--------------|
+| `PORT` | The port the backend runs on | No | `5000` |
+| `MONGO_URI` | Connection string for MongoDB | No | `mongodb://localhost:27017/propel_ai` |
+| `GEMINI_API_KEY` | API key for generating AI briefings | **Yes** | N/A |
+| `NODE_ENV` | Environment mode | No | `development` |
 
-## Resetting State
-To wipe all data and start fresh:
+## 4. Troubleshooting Guide
+
+During development, you might encounter these failure modes:
+
+### A. Blank Screen on Frontend (React Crash)
+**Symptom:** Opening localhost:5173 shows a completely blank dark screen, and no UI renders.
+**Cause:** Vite dynamic module importing or HMR cache failure.
+**Fix:** Hard refresh the browser (Ctrl+F5). If it persists, delete the `.vite` cache folder in `frontend/node_modules/` and restart the dev server.
+
+### B. "Cannot resolve ticket, poles are still dark" Error
+**Symptom:** Clicking "Mark Resolved" on the frontend throws an error toaster.
+**Cause:** The system prevents operators from closing tickets if the physical sensors still report `energized: false`.
+**Fix:** Use the Fault Simulator to inject a `Status Update` with `True (Live)` for the affected poles first, then resolve.
+
+### C. MongoDB Connection Timeout
+**Symptom:** Backend logs show `MongoTimeoutError`.
+**Cause:** Docker compose network delay, or local MongoDB service is not running.
+**Fix:** Restart docker compose. The backend includes a robust retry mechanism, but if MongoDB is entirely down, ensure the daemon is active via `systemctl start mongod`.
+
+## 5. Clean Reset
+
+To wipe the database and start entirely fresh:
+
 ```bash
 docker compose down -v
 docker compose up --build
 ```
+The `-v` flag deletes the MongoDB volume, and the backend will re-seed the initial pristine network on the next boot.

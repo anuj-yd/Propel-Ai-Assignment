@@ -5,6 +5,10 @@ const telemetryRepository = require('../repositories/TelemetryRepository');
 const ticketService = require('./TicketService');
 
 class TelemetryService {
+  setSocketIo(io) {
+    this.io = io;
+  }
+
   async process(data) {
     console.log(`\n[TelemetryService] Received telemetry for Device: ${data.device_id}, Pole: ${data.pole_id}, Seq: ${data.seq}, Event: ${data.event}`);
     
@@ -30,6 +34,11 @@ class TelemetryService {
     
     // Update current Pole Status in DB
     await poleRepository.updatePoleStatus(data.pole_id, data.energized);
+    
+    // Notify Frontend
+    if (this.io) {
+      this.io.emit('POLE_STATUS_UPDATE', { pole_id: data.pole_id, energized: data.energized });
+    }
     
     // Handle Scheduled Outages: Update DB but do not trigger fault detection
     if (data.event === 'scheduled_outage') {

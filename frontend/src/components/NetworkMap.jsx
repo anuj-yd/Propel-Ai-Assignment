@@ -1,34 +1,49 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { fetchNetwork } from '../services/api';
+import { fetchNetwork, fetchTickets } from '../services/api';
 import { socket } from '../services/socket';
 
 export default function NetworkMap() {
   const [poles, setPoles] = useState([]);
   const [connections, setConnections] = useState([]);
+  const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadNetwork = async () => {
+    const loadData = async () => {
       try {
-        const data = await fetchNetwork();
-        setPoles(data.poles || []);
-        setConnections(data.connections || []);
+        const [netData, tixData] = await Promise.all([
+          fetchNetwork(),
+          fetchTickets()
+        ]);
+        setPoles(netData.poles || []);
+        setConnections(netData.connections || []);
+        
+        const ticketsArray = Array.isArray(tixData) ? tixData : [];
+        setTickets(ticketsArray.filter(t => t.status === 'OPEN'));
       } catch (error) {
-        console.error('Failed to load network:', error);
+        console.error('Failed to load network/tickets:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadNetwork();
+    loadData();
 
     socket.connect();
     socket.on('POLE_STATUS_UPDATE', ({ pole_id, energized }) => {
       setPoles(prev => prev.map(p => p.poleId === pole_id ? { ...p, energized } : p));
     });
+    socket.on('NEW_TICKET', (ticket) => {
+      setTickets(prev => [ticket, ...prev]);
+    });
+    socket.on('TICKET_RESOLVED', (ticketId) => {
+      setTickets(prev => prev.filter(t => t.ticketId !== ticketId));
+    });
 
     return () => {
       socket.off('POLE_STATUS_UPDATE');
+      socket.off('NEW_TICKET');
+      socket.off('TICKET_RESOLVED');
     };
   }, []);
 
@@ -97,9 +112,21 @@ export default function NetworkMap() {
                 cx={getX(pole.lng)} 
                 cy={getY(pole.lat)} 
                 r="12" 
-                fill={pole.energized ? '#10b981' : '#ef4444'} 
+                fill={
+                  pole.energized 
+                    ? '#10b981' // Green (Live)
+                    : ((tickets || []).some(t => t.boundary && t.boundary.includes(pole.poleId)) 
+                        ? '#ef4444' // Red (Span Fault)
+                        : '#f59e0b') // Orange (Dead Sensor / Noise)
+                } 
                 className="transition-colors duration-500"
-                style={{ filter: `drop-shadow(0 0 8px ${pole.energized ? 'rgba(16,185,129,0.5)' : 'rgba(239,68,68,0.5)'})` }}
+                style={{ 
+                  filter: `drop-shadow(0 0 8px ${
+                    pole.energized 
+                      ? 'rgba(16,185,129,0.5)' 
+                      : ((tickets || []).some(t => t.boundary && t.boundary.includes(pole.poleId)) ? 'rgba(239,68,68,0.5)' : 'rgba(245,158,11,0.5)')
+                  })` 
+                }}
               />
               <text 
                 x={getX(pole.lng)} 
@@ -111,15 +138,6 @@ export default function NetworkMap() {
               >
                 {pole.poleId}
               </text>
-              <text 
-                x={getX(pole.lng)} 
-                y={getY(pole.lat) + 25} 
-                textAnchor="middle" 
-                fill="#94a3b8" 
-                fontSize="10"
-              >
-                {pole.lat.toFixed(4)}, {pole.lng.toFixed(4)}
-              </text>
             </g>
           ))}
         </svg>
@@ -127,7 +145,8 @@ export default function NetworkMap() {
         {/* Legend */}
         <div className="absolute bottom-4 left-4 flex gap-4 text-xs font-semibold bg-black/40 px-4 py-2 rounded-lg">
           <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></span> Live</div>
-          <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]"></span> Fault / Dark</div>
+          <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]"></span> Broken Wire (Fault)</div>
+          <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_8px_#f59e0b]"></span> Dead Sensor (Noise)</div>
         </div>
       </div>
     </div>
